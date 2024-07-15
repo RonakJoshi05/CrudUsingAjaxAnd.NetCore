@@ -43,12 +43,50 @@
         $('#addEmpModel').modal('show');
     });
 
-    // open model for edit data
+    // Open model for edit data
     $(document).on('click', '.edit-btn', function () {
         var id = $(this).data('id');
         // console.log("==> Edit Id: ", id)
         LoadEmpData(id);
         $('#editEmpModel').modal('show')
+    })
+
+    // Open model for upload employee data
+    $('#uploadEmpData').click(function () {
+        $('#UploadFile').modal('show');
+    });
+
+    // UploadData
+    $("#UploadEmpData").click(function () {
+
+        var formData = new FormData();
+        var file = $("#SelectedFile")[0].files[0];
+        formData.append("File", file);
+
+        console.log("==>>", formData);
+
+        $.ajax({
+            type: "POST",
+            url: "/Employee/UploadEmpData",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $("#UploadFile").modal("hide");
+                    $("#EmployeeTable").DataTable().ajax.reload();
+                }
+                else
+                {
+                    $('#UploadFile').modal('hide');
+                    $('#errorModal').modal('show');
+                    $('#errorModal').text(response.error);
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        })
     })
 
     // Save Data
@@ -112,6 +150,7 @@
             $("#employeeForm").validate().focusInvalid();
         }
     })
+
     // Update Data
     $("#UpdateEmployeeData").click(function () {
 
@@ -215,6 +254,23 @@
     });
 
     // Form validation
+    $("#Upload_Data").validate({
+        errorClass: 'text-danger',
+        rules: {
+            SelectedFile: {
+                required: true,
+            }
+        },
+        messages: {
+            SelectedFile: {
+                required: "Please select the file"
+            }
+        },
+        submitHandler: function (form) {
+            form.submit();
+        }
+    });
+
     $("#employeeForm").validate({
         errorClass: 'text-danger',
         rules: {

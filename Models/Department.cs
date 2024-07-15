@@ -7,7 +7,7 @@ namespace CrudUsingAjax.Models
     {
         [Key]
         public int Department_Id { get; set; }
-        [EnumDataType(typeof(DepartmentName))]
+        [EnumDataType(typeof(DepartmentName))]  
         public DepartmentName? DepartmentName { get; set; }
     }
     public enum DepartmentName

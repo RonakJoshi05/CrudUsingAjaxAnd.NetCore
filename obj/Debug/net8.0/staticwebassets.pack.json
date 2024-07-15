@@ -5,6 +5,10 @@
       "PackagePath": "staticwebassets\\CrudUsingAjax.bundle.scp.css"
     },
     {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\74272283-3ba4-48fe-9831-68bb9eb6140a_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\74272283-3ba4-48fe-9831-68bb9eb6140a_MOCK_DATA.csv"
+    },
+    {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },
@@ -67,6 +71,10 @@
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\20240708114602_ImportedPhoto_1715928228338.jpg",
       "PackagePath": "staticwebassets\\image\\20240708114602_ImportedPhoto_1715928228338.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\20240712162328_ImportedPhoto_1715928228338.jpg",
+      "PackagePath": "staticwebassets\\image\\20240712162328_ImportedPhoto_1715928228338.jpg"
     },
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\js\\AjaxCrud.js",

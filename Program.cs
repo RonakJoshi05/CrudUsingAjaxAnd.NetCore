@@ -1,4 +1,5 @@
 using CrudUsingAjax.DataBase;
+using CrudUsingAjax.Repositories;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(Option => Option.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeDbConnection")));
+builder.Services.AddScoped(typeof(IEmployeeRepository<>), typeof(EmployeeRepository<>));
 
 var app = builder.Build();
 

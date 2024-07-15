@@ -1,19 +1,30 @@
 ﻿using CrudUsingAjax.DataBase;
 using CrudUsingAjax.Models;
+using CrudUsingAjax.Repositories;
+using ExcelDataReader;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace CrudUsingAjax.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IEmployeeRepository<Employee> _employeeRepository;
+        private readonly IEmployeeRepository<Department> _departmentRepository;
         private readonly ILogger<EmployeeController> _logger;
-        public EmployeeController(AppDbContext context, ILogger<EmployeeController> logger)
+
+        public EmployeeController(IEmployeeRepository<Employee> employeeRepository, IEmployeeRepository<Department> departmentRepository, ILogger<EmployeeController> logger)
         {
-            _context = context;
+            _employeeRepository = employeeRepository;
+            _departmentRepository = departmentRepository;
             _logger = logger;
         }
+
         public IActionResult Index()
         {
             return View();
@@ -35,21 +46,21 @@ namespace CrudUsingAjax.Controllers
                 int skip = start != null ? Convert.ToInt32(start) : 0;
                 int recordsTotal = 0;
 
-                var employeeData = _context.EmployeesDB.Include(e => e.Department).AsQueryable();
+                var employeeData = _employeeRepository.GetAll();
 
                 // Search
-                if (!string.IsNullOrWhiteSpace(searchValue)) 
-                { 
-                    employeeData = employeeData.Where( m => m.First_Name.Contains(searchValue) || 
-                                                            m.Last_Name.Contains(searchValue) ||
-                                                            m.Email.Contains(searchValue) || 
-                                                            m.Phone_Number.Contains(searchValue) ||
-                                                            m.Gender.Contains(searchValue) ||
-                                                            m.Address.Contains(searchValue));
+                if (!string.IsNullOrWhiteSpace(searchValue))
+                {
+                    employeeData = employeeData.Where(m => m.First_Name.Contains(searchValue) ||
+                                                           m.Last_Name.Contains(searchValue) ||
+                                                           m.Email.Contains(searchValue) ||
+                                                           m.Phone_Number.Contains(searchValue) ||
+                                                           m.Gender.Contains(searchValue) ||
+                                                           m.Address.Contains(searchValue));
                 }
 
                 // Sorting
-                switch(sortColumn)
+                switch (sortColumn)
                 {
                     case "0":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.First_Name) : employeeData.OrderByDescending(e => e.First_Name);
@@ -64,7 +75,7 @@ namespace CrudUsingAjax.Controllers
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Phone_Number) : employeeData.OrderByDescending(e => e.Phone_Number);
                         break;
                     case "4":
-                        employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Gender): employeeData.OrderByDescending(e => e.Gender);
+                        employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Gender) : employeeData.OrderByDescending(e => e.Gender);
                         break;
                     case "5":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Department.DepartmentName) : employeeData.OrderByDescending(e => e.Department.DepartmentName);
@@ -81,7 +92,7 @@ namespace CrudUsingAjax.Controllers
                 }
 
                 recordsTotal = employeeData.Count();
-    
+
                 var data = employeeData.Skip(skip).Take(pageSize).Select(e => new
                 {
                     employee_Id = e.Employee_Id,
@@ -90,7 +101,7 @@ namespace CrudUsingAjax.Controllers
                     email = e.Email,
                     phone_Number = e.Phone_Number,
                     gender = e.Gender,
-                    departmentName = e.Department.DepartmentName.ToString(), 
+                    departmentName = e.Department.DepartmentName.ToString(),
                     joining_Date = e.Joining_Date,
                     address = e.Address,
                 });
@@ -111,7 +122,7 @@ namespace CrudUsingAjax.Controllers
             _logger.LogInformation($"Fetching data for employee with ID: {id}");
             try
             {
-                var employee = _context.EmployeesDB.Include(e => e.Department).FirstOrDefault(e => e.Employee_Id == id);
+                var employee = _employeeRepository.GetById(id);
                 if (employee != null)
                 {
                     var res = new
@@ -126,7 +137,7 @@ namespace CrudUsingAjax.Controllers
                             phone_Number = employee.Phone_Number,
                             gender = employee.Gender,
                             department_Id = employee.Department_Id,
-                            joining_Date = employee.Joining_Date,   
+                            joining_Date = employee.Joining_Date,
                             address = employee.Address,
                         }
                     };
@@ -141,14 +152,13 @@ namespace CrudUsingAjax.Controllers
             }
         }
 
-        // Add Emp Data
+        // Add employee Data
         [HttpPost]
         public JsonResult AddNewEmpData([FromForm] Employee employeeData, [FromForm] IFormFile image)
         {
             try
             {
-
-                var existingEmployee = _context.EmployeesDB.FirstOrDefault(e => e.Email == employeeData.Email);
+                var existingEmployee = _employeeRepository.GetAll().FirstOrDefault(e => e.Email == employeeData.Email);
                 if (existingEmployee != null)
                 {
                     return Json(new
@@ -172,7 +182,7 @@ namespace CrudUsingAjax.Controllers
                 }
 
                 // Validate Department_Id
-                var department = _context.DepartmentDB.Find(employeeData.Department_Id);
+                var department = _departmentRepository.GetById(employeeData.Department_Id);
                 if (department == null)
                 {
                     _logger.LogError("Invalid Department_Id: " + employeeData.Department_Id);
@@ -184,8 +194,8 @@ namespace CrudUsingAjax.Controllers
                 }
 
                 // Save employee data
-                _context.EmployeesDB.Add(employeeData);
-                _context.SaveChanges();
+                _employeeRepository.Add(employeeData);
+                _employeeRepository.SaveChanges();
 
                 return Json(new { success = true, data = employeeData });
             }
@@ -201,12 +211,13 @@ namespace CrudUsingAjax.Controllers
             }
         }
 
-        // Update Employee Data
+        // Update employee Data
         public JsonResult UpdateEmpData([FromForm] Employee employee, [FromForm] IFormFile image)
         {
             try
             {
-                var existedEmployeeData = _context.EmployeesDB.AsNoTracking().FirstOrDefault(e => e.Employee_Id == employee.Employee_Id);
+                var existedEmployeeData = _employeeRepository.GetAll().AsNoTracking().FirstOrDefault(e => e.Employee_Id == employee.Employee_Id);
+
 
                 if (existedEmployeeData == null)
                 {
@@ -219,7 +230,7 @@ namespace CrudUsingAjax.Controllers
 
                 if (!string.IsNullOrWhiteSpace(employee.Email) && employee.Email != existedEmployeeData.Email)
                 {
-                    var existingEmployeeWithEmail = _context.EmployeesDB.FirstOrDefault(e => e.Email == employee.Email);
+                    var existingEmployeeWithEmail = _employeeRepository.GetAll().FirstOrDefault(e => e.Email == employee.Email);
                     if (existingEmployeeWithEmail != null)
                     {
                         return Json(new
@@ -266,8 +277,8 @@ namespace CrudUsingAjax.Controllers
                 }
 
                 // Update employee data
-                _context.EmployeesDB.Update(employee);
-                _context.SaveChanges();
+                _employeeRepository.Update(employee);
+                _employeeRepository.SaveChanges();
 
                 return Json(new
                 {
@@ -286,28 +297,147 @@ namespace CrudUsingAjax.Controllers
                     });
             }
         }
-        
-        // Delete Emp Data
+
+        // Delete employee Data
         [HttpPost]
         public JsonResult DeleteEmpData(int id)
         {
-            var employee = _context.EmployeesDB.Find(id);
-
-            if (employee != null)
+            try
             {
-                _context.EmployeesDB.Remove(employee);
-                _context.SaveChanges();
-                return Json(
-                    new
-                    {
-                        success = true
-                    });
-            }
-            return Json(
-                new
+                _employeeRepository.Delete(id);
+                _employeeRepository.SaveChanges();
+                return Json(new
                 {
-                    success = false
+                    success = true
                 });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting employee");
+                return Json(new
+                {
+                    success = false,
+                    error = ex.Message
+                });
+            }
+        }
+
+        // Upload employee Data
+        [HttpPost]
+        public IActionResult UploadEmpData(IFormFile file)
+        {
+            var response = new { success = false, error = "" };
+
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    response = new { success = false, error = "File is empty or not selected" };
+                    return Json(response);
+                }
+
+                string dataFileName = Path.GetFileName(file.FileName);
+
+                string extension = Path.GetExtension(dataFileName).ToLower();
+
+                var allowedExtensions = new[] { ".xls", ".xlsx", ".csv" };
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    response = new { success = false, error = "Only Excel files (.xls, .xlsx, .csv) are allowed." };
+                    return Json(response);
+                }
+
+                var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploaded_Files");
+
+                if (!Directory.Exists(uploadDirectory))
+                {
+                    Directory.CreateDirectory(uploadDirectory);
+                }
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+                var filePath = Path.Combine(uploadDirectory, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                var employeeList = new List<Employee>();
+
+                _logger.LogInformation($"Reading data from file: {filePath}");
+
+                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    IExcelDataReader reader = null;
+
+                    if(extension == ".xls")
+                    {
+                        reader = ExcelReaderFactory.CreateBinaryReader(stream);
+                    }
+                    else if(extension == ".xlsx")
+                    {
+                        reader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+                    }
+                    else if (extension == ".csv")
+                    {
+                        reader = ExcelReaderFactory.CreateCsvReader(stream);
+                    }
+
+                    if (reader != null)
+                    {
+                        using (reader)
+                        {
+                            while (reader.Read())
+                            {
+                                if (reader.Depth == 0) continue;
+
+                                var departmentStr = reader.GetValue(6)?.ToString();
+                                var departmentId = int.TryParse(departmentStr, out var deptId) ? deptId : 0;
+
+                                _logger.LogInformation($"Read Department Id: {departmentId}");
+
+                                if(_departmentRepository.GetById(departmentId) == null)
+                                {
+                                    _logger.LogError($"Department ID : {departmentId} not found in database");
+                                    continue;
+                                }
+                                
+                                var employee = new Employee
+                                {
+                                    First_Name = reader.GetValue(1)?.ToString(),
+                                    Last_Name = reader.GetValue(2)?.ToString(),
+                                    Email = reader.GetValue(3)?.ToString(),
+                                    Phone_Number = reader.GetValue(4)?.ToString(),
+                                    Gender = reader.GetValue(5)?.ToString(),
+                                    Department_Id = departmentId,
+                                    Joining_Date = DateTime.TryParse(reader.GetValue(7)?.ToString(), out var joiningDate) ? new DateOnly?(DateOnly.FromDateTime(joiningDate)) : null,
+                                    Address = reader.GetValue(8)?.ToString(),
+                                };
+                                employeeList.Add(employee);
+                            }
+                        }
+                    }
+                }
+                if (employeeList.Count > 0)
+                {
+                    _employeeRepository.AddRange(employeeList);
+                    _employeeRepository.SaveChanges();
+                }
+                else
+                {
+                    response = new { success = false, error = "No valid employee to upload. Please Check department Id" };
+                    return Json(response);
+                }
+                response = new { success = true, error = "" };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response = new { success = false, error = ex.Message };
+            }
+
+            return Json(response);
         }
     }
 }

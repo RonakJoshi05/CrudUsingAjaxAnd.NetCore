@@ -28,4 +28,5 @@ namespace CrudUsingAjax.DataBase
             base.OnModelCreating(modelBuilder);
         }
     }
+    
 }
