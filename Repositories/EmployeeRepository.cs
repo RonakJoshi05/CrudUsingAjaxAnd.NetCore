@@ -23,7 +23,6 @@ namespace CrudUsingAjax.Repositories
         {
             return _dbSet.Find(id);
         }
-
         public void Add(TEntity entity)
         {
             _dbSet.Add(entity);

@@ -1,24 +1,29 @@
 ﻿$(document).ready(function () {
     // Initialize Datatable 
-    $("#EmployeeTable").dataTable({
-        "processing": true,
-        "serverSide": true,
-        "filter": true,
-        "orderMulti": true,
-        "responsive": true,
-        "paging": true,
-        "ordering": true,
-        "lengthChange": true,
-        "Paginate": true,
-        "pagingType": "full_numbers",
-        lengthMenu: [
-            [5, 10, 15, 25, -1],
-            [5, 10, 15, 25, 'All']
-        ],
+    $("#EmployeeTable").DataTable({
+        processing: true,
+        serverSide: true,
+        filter: true,
+        orderMulti: true,
+        Sorting: [[0, "desc"]],
+        responsive: true,
+        scrollCollapse: false,
+        order: [],
+        scrollX: true,
+        ordering: true,
+        lengthChange: true,
+        paging: true,
+        Paginate: true,
+        pagingType: "full_numbers",
+        pageLength: 10,
         "ajax": {
             "url": '/Employee/EmployeeList',
             "type": "GET",
             "dataType": "json",
+            dataSrc: function (json) {
+                //console.log(json);
+                return json.data;
+            }
         },
         "columns": [
             { "data": "first_Name", "name": "First_Name", "autoWidth": true },
@@ -30,7 +35,7 @@
             { "data": "joining_Date", "name": "Joining_Data", "autoWidth": true },
             { "data": "address", "name": "Address", "autoWidth": true },
             {
-                "render": function (data,type, row) {
+                "render": function (data, type, row) {         
                     return `<a class="btn btn-success me-2 edit-btn" data-id="${row.employee_Id}">Edit</a> 
                         <a class="btn btn-danger delete-btn" data-id="${row.employee_Id}">Delete</a>`;
                 }
@@ -75,11 +80,13 @@
                 if (response.success) {
                     $("#UploadFile").modal("hide");
                     $("#EmployeeTable").DataTable().ajax.reload();
+                    $("#succesModel").removeClass('hide').addClass('show');
+                    $('#succesModel').text(response.message)
                 }
                 else
                 {
                     $('#UploadFile').modal('hide');
-                    $('#errorModal').modal('show');
+                    $('#errorModal').removeClass('hide').addClass('show');
                     $('#errorModal').text(response.error);
                 }
             },
@@ -132,12 +139,14 @@
                         $('#employeeForm')[0].reset();
                         $('#addEmpModel').modal('hide');
                         $("#EmployeeTable").DataTable().ajax.reload();
+                        $("#succesModel").removeClass('hide').addClass('show');
+                        $("#succesModel").text(response.message);
                     }
                     else
                     {
                         $('#addEmpModel').modal('hide');
-                        $('#errorModal').text(response.error);
                         $('#errorModal').removeClass('hide').addClass('show');
+                        $('#errorModal').text(response.error);
                     }
                 },
                 error: function (error) {
@@ -170,12 +179,14 @@
                         $('#employeeForm')[0].reset();
                         $("#editEmpModel").modal('hide');
                         $("#EmployeeTable").DataTable().ajax.reload();
+                        $("#succesModel").removeClass("hide").addClass("show");
+                        $("#succesModel").text(response.message);
                     }
                     else
                     {
                         $('#editEmpModel').modal('hide');
-                        $('#errorModal .modal-body').text(response.error);
-                        $('#errorModal').modal('show');
+                        $('#errorModal').removeClass('hide').addClass('show');
+                        $('#errorModal').text(response.error);
                     }
                 },
                 error: function (error) {
@@ -237,8 +248,12 @@
             success: function (response) {
                 if (response.success) {
                     $("#EmployeeTable").DataTable().ajax.reload();
+                    $("#succesModel").removeClass('hide alert-success').addClass('show alert-danger');
+                    $("#succesModel").text(response.message);
                 } else {
                     console.error("Failed to delete employee.");
+                    $('#errorModal').removeClass('hide').addClass('show');
+                    $('#errorModal').text(response.error);
                 }
             },
             error: function (error) {

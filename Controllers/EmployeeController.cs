@@ -36,17 +36,22 @@ namespace CrudUsingAjax.Controllers
             try
             {
                 var draw = HttpContext.Request.Query["draw"].FirstOrDefault();
-                var start = Request.Query["start"].FirstOrDefault();
-                var length = Request.Query["length"].FirstOrDefault();
-                var searchValue = Request.Query["search[Value]"].FirstOrDefault();
-                var sortColumn = Request.Query["order[0][column]"].FirstOrDefault();
-                var sortColumnDirection = Request.Query["order[0][dir]"].FirstOrDefault();
+                var start = HttpContext.Request.Query["start"].FirstOrDefault();
+                var length = HttpContext.Request.Query["length"].FirstOrDefault();
+                var searchValue = HttpContext.Request.Query["search[Value]"].FirstOrDefault();
+                var sortColumn = HttpContext.Request.Query["order[0][column]"].FirstOrDefault();
+                var sortColumnDirection = HttpContext.Request.Query["order[0][dir]"].FirstOrDefault();
 
-                int pageSize = length != null ? Convert.ToInt32(length) : 0;
-                int skip = start != null ? Convert.ToInt32(start) : 0;
+                //_logger.LogInformation($"===>>> Draw: {draw}, Start: {start}, Length: {length}, Search: {searchValue}, SortColumn: {sortColumn}, SortDirection: {sortColumnDirection}");
+
+                int skip = start != null ? int.Parse(start) : 0;
+                int pageLength = length != null ? int.Parse(length) : 0;
                 int recordsTotal = 0;
 
-                var employeeData = _employeeRepository.GetAll();
+                //_logger.LogInformation($"===>>> Page Length : {pageLength}");
+                //_logger.LogInformation($"===>>> Skip : {skip}");
+
+                var employeeData = _employeeRepository.GetAll().AsQueryable();
 
                 // Search
                 if (!string.IsNullOrWhiteSpace(searchValue))
@@ -92,8 +97,9 @@ namespace CrudUsingAjax.Controllers
                 }
 
                 recordsTotal = employeeData.Count();
+                //_logger.LogInformation($"===>>> Filtered Count : {recordsTotal}");
 
-                var data = employeeData.Skip(skip).Take(pageSize).Select(e => new
+                var data = employeeData.Skip(skip).Take(pageLength).Select(e => new
                 {
                     employee_Id = e.Employee_Id,
                     first_Name = e.First_Name,
@@ -104,14 +110,19 @@ namespace CrudUsingAjax.Controllers
                     departmentName = e.Department.DepartmentName.ToString(),
                     joining_Date = e.Joining_Date,
                     address = e.Address,
-                });
+                }).ToList();
 
-                return Json(new { draw = draw, recordFiltered = recordsTotal, recordsTotal = recordsTotal, data = data });
+
+                var JsonData = (new { draw = Convert.ToInt32(draw), recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = data });
+
+                //_logger.LogInformation($"===>>> JsonData : {JsonData}");
+
+                return Json(JsonData);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching employee list");
-                return Json(new { success = false, data = ex.Message });
+                return Json(new { success = false });
             }
         }
 
@@ -119,7 +130,7 @@ namespace CrudUsingAjax.Controllers
         [HttpGet]
         public JsonResult GetEmpData(int id)
         {
-            _logger.LogInformation($"Fetching data for employee with ID: {id}");
+            //_logger.LogInformation($"Fetching data for employee with ID: {id}");
             try
             {
                 var employee = _employeeRepository.GetById(id);
@@ -164,7 +175,7 @@ namespace CrudUsingAjax.Controllers
                     return Json(new
                     {
                         success = false,
-                        error = "Email already exists in the database."
+                        error = "Email already exists."
                     });
                 }
 
@@ -197,7 +208,7 @@ namespace CrudUsingAjax.Controllers
                 _employeeRepository.Add(employeeData);
                 _employeeRepository.SaveChanges();
 
-                return Json(new { success = true, data = employeeData });
+                return Json(new { success = true, data = employeeData, message = "Employee successfully added" });
             }
             catch (Exception ex)
             {
@@ -206,7 +217,6 @@ namespace CrudUsingAjax.Controllers
                     new
                     {
                         success = false,
-                        error = ex.Message
                     });
             }
         }
@@ -217,7 +227,6 @@ namespace CrudUsingAjax.Controllers
             try
             {
                 var existedEmployeeData = _employeeRepository.GetAll().AsNoTracking().FirstOrDefault(e => e.Employee_Id == employee.Employee_Id);
-
 
                 if (existedEmployeeData == null)
                 {
@@ -236,7 +245,7 @@ namespace CrudUsingAjax.Controllers
                         return Json(new
                         {
                             success = false,
-                            error = "Email already exists in the database."
+                            error = "Email already exists."
                         });
                     }
                 }
@@ -284,6 +293,7 @@ namespace CrudUsingAjax.Controllers
                 {
                     success = true,
                     data = employee,
+                    message = "Employee successfully updated"
                 });
             }
             catch (Exception ex)
@@ -293,7 +303,6 @@ namespace CrudUsingAjax.Controllers
                     new
                     {
                         success = false,
-                        error = ex.Message
                     });
             }
         }
@@ -308,44 +317,38 @@ namespace CrudUsingAjax.Controllers
                 _employeeRepository.SaveChanges();
                 return Json(new
                 {
-                    success = true
+                    success = true,
+                    message = "Employee successfully deleted"
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while deleting employee");
+                _logger.LogError(ex.Message);
                 return Json(new
                 {
                     success = false,
-                    error = ex.Message
                 });
             }
         }
 
         // Upload employee Data
         [HttpPost]
-        public IActionResult UploadEmpData(IFormFile file)
+        public JsonResult UploadEmpData(IFormFile file)
         {
-            var response = new { success = false, error = "" };
-
             try
             {
                 if (file == null || file.Length == 0)
                 {
-                    response = new { success = false, error = "File is empty or not selected" };
-                    return Json(response);
+                    return Json(new { success = false, error = "File is empty or not selected" });
                 }
 
                 string dataFileName = Path.GetFileName(file.FileName);
-
                 string extension = Path.GetExtension(dataFileName).ToLower();
-
                 var allowedExtensions = new[] { ".xls", ".xlsx", ".csv" };
 
                 if (!allowedExtensions.Contains(extension))
                 {
-                    response = new { success = false, error = "Only Excel files (.xls, .xlsx, .csv) are allowed." };
-                    return Json(response);
+                    return Json(new { success = false, error = "Only Excel files (.xls, .xlsx, .csv) are allowed." });
                 }
 
                 var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploaded_Files");
@@ -365,7 +368,7 @@ namespace CrudUsingAjax.Controllers
 
                 var employeeList = new List<Employee>();
 
-                _logger.LogInformation($"Reading data from file: {filePath}");
+               // _logger.LogInformation($"Reading data from file: {filePath}");
 
                 using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
@@ -395,14 +398,23 @@ namespace CrudUsingAjax.Controllers
                                 var departmentStr = reader.GetValue(6)?.ToString();
                                 var departmentId = int.TryParse(departmentStr, out var deptId) ? deptId : 0;
 
-                                _logger.LogInformation($"Read Department Id: {departmentId}");
+                                //_logger.LogInformation($"Read Department Id: {departmentId}");
 
                                 if(_departmentRepository.GetById(departmentId) == null)
                                 {
                                     _logger.LogError($"Department ID : {departmentId} not found in database");
                                     continue;
                                 }
-                                
+
+                                var email = reader.GetValue(3)?.ToString();
+                                var existingEmployee = _employeeRepository.GetAll().FirstOrDefault(e => e.Email == email);
+
+                                if (existingEmployee != null)
+                                {
+                                    _logger.LogError("Some emails already exist");
+                                    continue;
+                                }
+
                                 var employee = new Employee
                                 {
                                     First_Name = reader.GetValue(1)?.ToString(),
@@ -423,21 +435,19 @@ namespace CrudUsingAjax.Controllers
                 {
                     _employeeRepository.AddRange(employeeList);
                     _employeeRepository.SaveChanges();
+                    return Json(new { success = true, message = "Employee successfully uploaded" });
                 }
                 else
                 {
-                    response = new { success = false, error = "No valid employee to upload. Please Check department Id" };
-                    return Json(response);
-                }
-                response = new { success = true, error = "" };
+                    return Json(new { success = false, error = "No valid employee to upload."});
+                }    
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                response = new { success = false, error = ex.Message };
+                return Json(new { success = false });
             }
-
-            return Json(response);
         }
     }
 }
+
