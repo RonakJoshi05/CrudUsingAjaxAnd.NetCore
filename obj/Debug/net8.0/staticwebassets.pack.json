@@ -9,12 +9,20 @@
       "PackagePath": "staticwebassets\\Uploaded_Files\\0fe1248d-9c92-4141-86f5-9ad7b07d37a0_MOCK_DATA.csv"
     },
     {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\2ba3e338-50ad-4d52-8319-50fb87185a84_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\2ba3e338-50ad-4d52-8319-50fb87185a84_MOCK_DATA.csv"
+    },
+    {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\3650d226-230f-418a-8a37-f9f488459bad_MOCK_DATA.csv",
       "PackagePath": "staticwebassets\\Uploaded_Files\\3650d226-230f-418a-8a37-f9f488459bad_MOCK_DATA.csv"
     },
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\45cfb715-b2c1-4f88-9260-c534c647294a_MOCK_DATA.csv",
       "PackagePath": "staticwebassets\\Uploaded_Files\\45cfb715-b2c1-4f88-9260-c534c647294a_MOCK_DATA.csv"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\4ae54b47-4ae3-4860-8da2-c7f7ca257660_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\4ae54b47-4ae3-4860-8da2-c7f7ca257660_MOCK_DATA.csv"
     },
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\5158e6ee-d112-4ce8-b171-266a4ce06cff_MOCK_DATA.csv",
@@ -29,8 +37,24 @@
       "PackagePath": "staticwebassets\\Uploaded_Files\\5db61c5b-3e82-4e65-8bd7-d618f70e753a_MOCK_DATA.csv"
     },
     {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\648d86a9-4467-49fa-a170-41cd28b4faad_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\648d86a9-4467-49fa-a170-41cd28b4faad_MOCK_DATA.csv"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\68d7f509-355f-4753-99e4-a8ec75849299_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\68d7f509-355f-4753-99e4-a8ec75849299_MOCK_DATA.csv"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\6c42237a-6b0e-4c62-978e-5fd87da5259d_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\6c42237a-6b0e-4c62-978e-5fd87da5259d_MOCK_DATA.csv"
+    },
+    {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\74272283-3ba4-48fe-9831-68bb9eb6140a_MOCK_DATA.csv",
       "PackagePath": "staticwebassets\\Uploaded_Files\\74272283-3ba4-48fe-9831-68bb9eb6140a_MOCK_DATA.csv"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\8a79e678-158f-4101-8af3-5ffc488575ab_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\8a79e678-158f-4101-8af3-5ffc488575ab_MOCK_DATA.csv"
     },
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\bd919e62-5ca2-44a7-ac69-95336978e0fc_MOCK_DATA.csv",
@@ -61,6 +85,10 @@
       "PackagePath": "staticwebassets\\Uploaded_Files\\d7551b8b-6b34-4b98-835e-671bbfc80736_MOCK_DATA.csv"
     },
     {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\e2632357-db3a-441d-b42e-d04c435709cb_MOCK_DATA.csv",
+      "PackagePath": "staticwebassets\\Uploaded_Files\\e2632357-db3a-441d-b42e-d04c435709cb_MOCK_DATA.csv"
+    },
+    {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\Uploaded_Files\\ea5982ca-b135-4087-8aba-95ef90cee141_MOCK_DATA.csv",
       "PackagePath": "staticwebassets\\Uploaded_Files\\ea5982ca-b135-4087-8aba-95ef90cee141_MOCK_DATA.csv"
     },
@@ -79,6 +107,14 @@
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\0dfd2fbb-2f22-4dc8-8499-692c0a90355b_10.jpg",
+      "PackagePath": "staticwebassets\\image\\0dfd2fbb-2f22-4dc8-8499-692c0a90355b_10.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\1dadfaaf-6d30-4d70-a9ba-548bebc20ad7_ImportedPhoto_1715928228338.jpg",
+      "PackagePath": "staticwebassets\\image\\1dadfaaf-6d30-4d70-a9ba-548bebc20ad7_ImportedPhoto_1715928228338.jpg"
     },
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\20240705141559_ImportedPhoto_1715928228338.jpg",
@@ -141,8 +177,44 @@
       "PackagePath": "staticwebassets\\image\\20240712162328_ImportedPhoto_1715928228338.jpg"
     },
     {
-      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\20240715103031_MOCK_DATA.csv",
-      "PackagePath": "staticwebassets\\image\\20240715103031_MOCK_DATA.csv"
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\41ebb1f5-aaba-4d60-a2d3-4cf4632b9323_8.jpg",
+      "PackagePath": "staticwebassets\\image\\41ebb1f5-aaba-4d60-a2d3-4cf4632b9323_8.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\54ef7628-a7dd-41a2-83e9-f513cc469e10_1.jpg",
+      "PackagePath": "staticwebassets\\image\\54ef7628-a7dd-41a2-83e9-f513cc469e10_1.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\56f0d296-2856-46c0-8000-cf74e4481e06_3.jpg",
+      "PackagePath": "staticwebassets\\image\\56f0d296-2856-46c0-8000-cf74e4481e06_3.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\6072e55f-617b-450d-bbd3-d338f3f4db77_6.jpg",
+      "PackagePath": "staticwebassets\\image\\6072e55f-617b-450d-bbd3-d338f3f4db77_6.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\7450ce73-3f20-4658-810b-bc7c31c571d1_7.jpg",
+      "PackagePath": "staticwebassets\\image\\7450ce73-3f20-4658-810b-bc7c31c571d1_7.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\74861d9e-4538-4222-b9c7-109edf524ed7_5.jpg",
+      "PackagePath": "staticwebassets\\image\\74861d9e-4538-4222-b9c7-109edf524ed7_5.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\a73dbc37-d009-4738-9491-db66ffe11e87_2jpg",
+      "PackagePath": "staticwebassets\\image"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\c3bb96e0-47fb-4652-b269-a8cecd6123d1_4.jpg",
+      "PackagePath": "staticwebassets\\image\\c3bb96e0-47fb-4652-b269-a8cecd6123d1_4.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\d6415d30-6a8a-4b78-92e4-54480cd84b04_ImportedPhoto_1715928228338.jpg",
+      "PackagePath": "staticwebassets\\image\\d6415d30-6a8a-4b78-92e4-54480cd84b04_ImportedPhoto_1715928228338.jpg"
+    },
+    {
+      "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\image\\f87ea96e-5859-4602-9246-5ff6ad7c2279_9.jpg",
+      "PackagePath": "staticwebassets\\image\\f87ea96e-5859-4602-9246-5ff6ad7c2279_9.jpg"
     },
     {
       "Id": "D:\\3. .NET Core\\Dot Net\\CrudUsingAjax\\CrudUsingAjax\\wwwroot\\js\\AjaxCrud.js",

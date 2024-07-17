@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
 using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 
@@ -112,7 +114,6 @@ namespace CrudUsingAjax.Controllers
                     address = e.Address,
                 }).ToList();
 
-
                 var JsonData = (new { draw = Convert.ToInt32(draw), recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = data });
 
                 //_logger.LogInformation($"===>>> JsonData : {JsonData}");
@@ -182,8 +183,7 @@ namespace CrudUsingAjax.Controllers
                 // Handle image upload
                 if (image != null)
                 {
-                    var Date = DateTime.Now.ToString("yyyyMMddHHmmss");
-                    var uniqueFileName = $"{Date}_{image.FileName}";
+                    var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(image.FileName)}";
                     var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/image", uniqueFileName);
                     using (var stream = new FileStream(imagePath, FileMode.Create))
                     {
@@ -368,17 +368,17 @@ namespace CrudUsingAjax.Controllers
 
                 var employeeList = new List<Employee>();
 
-               // _logger.LogInformation($"Reading data from file: {filePath}");
+                // _logger.LogInformation($"Reading data from file: {filePath}");
 
                 using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     IExcelDataReader reader = null;
 
-                    if(extension == ".xls")
+                    if (extension == ".xls")
                     {
                         reader = ExcelReaderFactory.CreateBinaryReader(stream);
                     }
-                    else if(extension == ".xlsx")
+                    else if (extension == ".xlsx")
                     {
                         reader = ExcelReaderFactory.CreateOpenXmlReader(stream);
                     }
@@ -400,7 +400,7 @@ namespace CrudUsingAjax.Controllers
 
                                 //_logger.LogInformation($"Read Department Id: {departmentId}");
 
-                                if(_departmentRepository.GetById(departmentId) == null)
+                                if (_departmentRepository.GetById(departmentId) == null)
                                 {
                                     _logger.LogError($"Department ID : {departmentId} not found in database");
                                     continue;
@@ -426,6 +426,24 @@ namespace CrudUsingAjax.Controllers
                                     Joining_Date = DateTime.TryParse(reader.GetValue(7)?.ToString(), out var joiningDate) ? new DateOnly?(DateOnly.FromDateTime(joiningDate)) : null,
                                     Address = reader.GetValue(8)?.ToString(),
                                 };
+
+                                // Handle image upload
+                                var imageFileName = reader.GetValue(9)?.ToString();
+                                if (!string.IsNullOrWhiteSpace(imageFileName))
+                                {
+                                    var uniqueImageName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFileName)}";
+                                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/image", uniqueImageName);
+
+                                    using (var imageStream = new FileStream(imagePath, FileMode.Create))
+                                    {
+                                        file.CopyTo(imageStream);
+                                    }
+                                    employee.Profile_Image = "/image/" + uniqueImageName;
+                                }
+                                else
+                                {
+                                    _logger.LogError($"{imageFileName} does not exist.");
+                                }
                                 employeeList.Add(employee);
                             }
                         }
@@ -439,13 +457,68 @@ namespace CrudUsingAjax.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, error = "No valid employee to upload."});
-                }    
+                    return Json(new { success = false, error = "No valid employee to upload." });
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return Json(new { success = false });
+            }
+        }
+
+        public IActionResult DownloadEmpExcel()
+        {
+            try
+            {
+                var employees = _employeeRepository.GetAll().Include(e => e.Department).ToList();
+
+                var datatable = new DataTable("Employees");
+                datatable.Columns.AddRange(new DataColumn[]
+                {
+                new DataColumn("First Name"),
+                new DataColumn("Last Name"),
+                new DataColumn("Email"),
+                new DataColumn("Phone Number"),
+                new DataColumn("Gender"),
+                new DataColumn("Department"),
+                new DataColumn("Joining Date"),
+                new DataColumn("Address"),
+                new DataColumn("Profile Image")
+                });
+
+                foreach (var employee in employees)
+                {
+                    datatable.Rows.Add(
+                            employee.First_Name,
+                            employee.Last_Name,
+                            employee.Email,
+                            employee.Phone_Number,
+                            employee.Gender,
+                            employee.Department.DepartmentName,
+                            employee.Joining_Date,
+                            employee.Address,
+                            employee.Profile_Image
+                        );
+                }
+
+                var memoryStream = new MemoryStream();
+                using (var excelPackege = new ExcelPackage(memoryStream))
+                {
+                    var worksheet = excelPackege.Workbook.Worksheets.Add("Employees");
+                    worksheet.Cells["A1"].LoadFromDataTable(datatable, true);
+                    excelPackege.Save();
+                }
+                memoryStream.Position = 0;
+                return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Employees.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return Json(new
+                {
+                    success = false,
+                });
             }
         }
     }

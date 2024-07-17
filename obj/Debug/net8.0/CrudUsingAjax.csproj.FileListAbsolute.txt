@@ -505,3 +505,7 @@ D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\obj\Debug\net8.0\ref\CrudUsi
 D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\bin\Debug\net8.0\libman.json
 D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\obj\Debug\net8.0\CrudUsingAjax.sourcelink.json
 D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\bin\Debug\net8.0\ExcelDataReader.dll
+D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\bin\Debug\net8.0\EPPlus.dll
+D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\bin\Debug\net8.0\EPPlus.Interfaces.dll
+D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\bin\Debug\net8.0\EPPlus.System.Drawing.dll
+D:\3. .NET Core\Dot Net\CrudUsingAjax\CrudUsingAjax\bin\Debug\net8.0\Microsoft.IO.RecyclableMemoryStream.dll

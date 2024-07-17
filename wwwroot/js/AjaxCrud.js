@@ -68,7 +68,7 @@
         var file = $("#SelectedFile")[0].files[0];
         formData.append("File", file);
 
-        console.log("==>>", formData);
+        //console.log("==>>", formData);
 
         $.ajax({
             type: "POST",
@@ -95,6 +95,11 @@
             }
         })
     })
+
+    // Download Data
+    $("#downloadExcel").on('click', function () {
+        window.location.href = "/Employee/DownloadEmpExcel"
+    });
 
     // Save Data
     $("#SaveEmployeeData").click(function () {
