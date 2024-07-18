@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Data;
 using System.IO;
@@ -490,15 +491,15 @@ namespace CrudUsingAjax.Controllers
                 foreach (var employee in employees)
                 {
                     datatable.Rows.Add(
-                            employee.First_Name,
-                            employee.Last_Name,
-                            employee.Email,
-                            employee.Phone_Number,
-                            employee.Gender,
-                            employee.Department.DepartmentName,
-                            employee.Joining_Date,
-                            employee.Address,
-                            employee.Profile_Image
+                           string.IsNullOrWhiteSpace(employee.First_Name) ? "First name is required" : employee.First_Name,
+                           string.IsNullOrWhiteSpace(employee.Last_Name) ? "Last name is requitred" : employee.Last_Name,
+                           string.IsNullOrWhiteSpace(employee.Email) ? "Email id is required" : employee.Email,
+                           string.IsNullOrWhiteSpace(employee.Phone_Number) ? "Phone number is required" : employee.Phone_Number,
+                           string.IsNullOrWhiteSpace(employee.Gender) ? "Gender is required" : employee.Gender,
+                           employee.Department != null ? employee.Department?.DepartmentName : "Department is required",
+                           employee.Joining_Date != null ? employee.Joining_Date : "Joining date is required",
+                           string.IsNullOrWhiteSpace(employee.Address) ? "Address is required" : employee.Address,
+                           string.IsNullOrWhiteSpace(employee.Profile_Image) ? "Profile image is required" : employee.Profile_Image
                         );
                 }
 
@@ -507,6 +508,18 @@ namespace CrudUsingAjax.Controllers
                 {
                     var worksheet = excelPackege.Workbook.Worksheets.Add("Employees");
                     worksheet.Cells["A1"].LoadFromDataTable(datatable, true);
+
+                    // Apply conditional formatting for required fields
+                    ApplyConditionalFormatting(worksheet, "A2:A" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "B2:B" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "C2:C" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "D2:D" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "E2:E" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "F2:F" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "G2:G" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "H2:H" + (employees.Count + 1));
+                    ApplyConditionalFormatting(worksheet, "I2:I" + (employees.Count + 1));
+
                     excelPackege.Save();
                 }
                 memoryStream.Position = 0;
@@ -520,6 +533,13 @@ namespace CrudUsingAjax.Controllers
                     success = false,
                 });
             }
+        }
+
+        private void ApplyConditionalFormatting(ExcelWorksheet worksheet, string rangeAddress)
+        {
+            var conditionalFormattingRule = worksheet.ConditionalFormatting.AddExpression(new ExcelAddress(rangeAddress));
+            conditionalFormattingRule.Style.Font.Color.Color = System.Drawing.Color.Red;
+            conditionalFormattingRule.Formula = $"ISNUMBER(SEARCH(\"required\", {rangeAddress.Split(':')[0]}))";
         }
     }
 }

@@ -26,6 +26,14 @@
             }
         },
         "columns": [
+            {
+                "render": function (data, type, row) {
+                    return `<div class="d-flex justify-content-between">
+                                <a class="btn btn-success edit-btn" data-id="${row.employee_Id}"><i class="bi bi-pencil-square"></i></a>
+                                <a class="btn btn-danger delete-btn" data-id="${row.employee_Id}"><i class="bi bi-trash"></i></a>
+                            </div>`;
+                }
+            },
             { "data": "first_Name", "name": "First_Name", "autoWidth": true },
             { "data": "last_Name", "name": "Last_Name", "autoWidth": true },
             { "data": "email", "name": "Email", "autoWidth": true },
@@ -34,12 +42,6 @@
             { "data": "departmentName", "name": "DepartmentName", "autoWidth": true },
             { "data": "joining_Date", "name": "Joining_Data", "autoWidth": true },
             { "data": "address", "name": "Address", "autoWidth": true },
-            {
-                "render": function (data, type, row) {         
-                    return `<a class="btn btn-success me-2 edit-btn" data-id="${row.employee_Id}">Edit</a> 
-                        <a class="btn btn-danger delete-btn" data-id="${row.employee_Id}">Delete</a>`;
-                }
-            }
         ]
     });
 
@@ -83,8 +85,7 @@
                     $("#succesModel").removeClass('hide').addClass('show');
                     $('#succesModel').text(response.message)
                 }
-                else
-                {
+                else {
                     $('#UploadFile').modal('hide');
                     $('#errorModal').removeClass('hide').addClass('show');
                     $('#errorModal').text(response.error);
@@ -147,8 +148,7 @@
                         $("#succesModel").removeClass('hide').addClass('show');
                         $("#succesModel").text(response.message);
                     }
-                    else
-                    {
+                    else {
                         $('#addEmpModel').modal('hide');
                         $('#errorModal').removeClass('hide').addClass('show');
                         $('#errorModal').text(response.error);
@@ -159,8 +159,7 @@
                 }
             })
         }
-        else
-        {
+        else {
             $("#employeeForm").validate().focusInvalid();
         }
     })
@@ -187,8 +186,7 @@
                         $("#succesModel").removeClass("hide").addClass("show");
                         $("#succesModel").text(response.message);
                     }
-                    else
-                    {
+                    else {
                         $('#editEmpModel').modal('hide');
                         $('#errorModal').removeClass('hide').addClass('show');
                         $('#errorModal').text(response.error);
@@ -199,8 +197,7 @@
                 }
             })
         }
-        else
-        {
+        else {
             $("#edit_employeeForm").validate().focusInvalid();
         }
     });
