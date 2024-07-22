@@ -116,7 +116,6 @@
                         } else {
                             window.location = downloadUrl;
                         }
-
                         setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
                     }
                 } else {
