@@ -65,12 +65,9 @@
 
     // UploadData
     $("#UploadEmpData").click(function () {
-
         var formData = new FormData();
         var file = $("#SelectedFile")[0].files[0];
-        formData.append("File", file);
-
-        //console.log("==>>", formData);
+        formData.append("file", file);
 
         $.ajax({
             type: "POST",
@@ -78,24 +75,107 @@
             data: formData,
             processData: false,
             contentType: false,
-            success: function (response) {
-                if (response.success) {
-                    $("#UploadFile").modal("hide");
-                    $("#EmployeeTable").DataTable().ajax.reload();
-                    $("#succesModel").removeClass('hide').addClass('show');
-                    $('#succesModel').text(response.message)
-                }
-                else {
-                    $('#UploadFile').modal('hide');
-                    $('#errorModal').removeClass('hide').addClass('show');
-                    $('#errorModal').text(response.error);
+            xhrFields: {
+                responseType: 'blob'  // to handle file download
+            },
+            success: function (response, status, xhr) {
+                // Close the upload modal
+                $("#UploadFile").modal("hide");
+
+                // Reload the data table
+                $("#EmployeeTable").DataTable().ajax.reload();
+
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    // Handle file download
+                    var filename = "";
+                    var matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+
+                    var type = xhr.getResponseHeader('Content-Type');
+                    var blob = new Blob([response], { type: type });
+
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var URL = window.URL || window.webkitURL;
+                        var downloadUrl = URL.createObjectURL(blob);
+
+                        if (filename) {
+                            var a = document.createElement("a");
+                            if (typeof a.download === 'undefined') {
+                                window.location = downloadUrl;
+                            } else {
+                                a.href = downloadUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        } else {
+                            window.location = downloadUrl;
+                        }
+
+                        setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                    }
+                } else {
+                    // Handle JSON response
+                    var reader = new FileReader();
+                    reader.onload = function (event) {
+                        var jsonResponse = JSON.parse(event.target.result);
+                        if (jsonResponse.success) {
+                            $("#succesModel").removeClass('hide').addClass('show');
+                            $('#succesModel').text(jsonResponse.message);
+                        } else {
+                            $('#errorModal').removeClass('hide').addClass('show');
+                            $('#errorModal').text(jsonResponse.error);
+                        }
+                    };
+                    reader.readAsText(response);
                 }
             },
             error: function (error) {
                 console.log(error);
+                $("#UploadFile").modal("hide");
+                $('#errorModal').removeClass('hide').addClass('show');
+                $('#errorModal').text("An error occurred while uploading the file.");
             }
-        })
-    })
+        });
+    });
+
+    //$("#UploadEmpData").click(function () {
+
+    //    var formData = new FormData();
+    //    var file = $("#SelectedFile")[0].files[0];
+    //    formData.append("File", file);
+
+    //    //console.log("==>>", formData);
+
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "/Employee/UploadEmpData",
+    //        data: formData,
+    //        processData: false,
+    //        contentType: false,
+    //        success: function (response) {
+    //            if (response.success) {
+    //                $("#UploadFile").modal("hide");
+    //                $("#EmployeeTable").DataTable().ajax.reload();
+    //                $("#succesModel").removeClass('hide').addClass('show');
+    //                $('#succesModel').text(response.message);
+    //            }
+    //            else {
+    //                $('#UploadFile').modal('hide');
+    //                $('#errorModal').removeClass('hide').addClass('show');
+    //                $('#errorModal').text(response.error);
+    //            }
+    //        },
+    //        error: function (error) {
+    //            console.log(error);
+    //        }
+    //    })
+    //})
 
     // Download Data
     $("#downloadExcel").on('click', function () {

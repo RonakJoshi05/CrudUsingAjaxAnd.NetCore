@@ -10,6 +10,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
@@ -70,28 +71,28 @@ namespace CrudUsingAjax.Controllers
                 // Sorting
                 switch (sortColumn)
                 {
-                    case "0":
+                    case "1":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.First_Name) : employeeData.OrderByDescending(e => e.First_Name);
                         break;
-                    case "1":
+                    case "2":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Last_Name) : employeeData.OrderByDescending(e => e.Last_Name);
                         break;
-                    case "2":
+                    case "3":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Email) : employeeData.OrderByDescending(e => e.Email);
                         break;
-                    case "3":
+                    case "4":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Phone_Number) : employeeData.OrderByDescending(e => e.Phone_Number);
                         break;
-                    case "4":
+                    case "5":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Gender) : employeeData.OrderByDescending(e => e.Gender);
                         break;
-                    case "5":
+                    case "6":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Department.DepartmentName) : employeeData.OrderByDescending(e => e.Department.DepartmentName);
                         break;
-                    case "6":
+                    case "7":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Joining_Date) : employeeData.OrderByDescending(e => e.Joining_Date);
                         break;
-                    case "7":
+                    case "8":
                         employeeData = sortColumnDirection == "asc" ? employeeData.OrderBy(e => e.Address) : employeeData.OrderByDescending(e => e.Address);
                         break;
                     default:
@@ -252,7 +253,6 @@ namespace CrudUsingAjax.Controllers
                 }
 
                 // Update only the fields that have new values provided by the user
-
                 if (string.IsNullOrWhiteSpace(employee.First_Name))
                 {
                     employee.First_Name = existedEmployeeData.First_Name;
@@ -331,11 +331,12 @@ namespace CrudUsingAjax.Controllers
                 });
             }
         }
-
         // Upload employee Data
         [HttpPost]
-        public JsonResult UploadEmpData(IFormFile file)
+        public IActionResult UploadEmpData(IFormFile file)
         {
+            var uploadResults = new List<(string Email, string Status, string Message)>();
+
             try
             {
                 if (file == null || file.Length == 0)
@@ -369,8 +370,6 @@ namespace CrudUsingAjax.Controllers
 
                 var employeeList = new List<Employee>();
 
-                // _logger.LogInformation($"Reading data from file: {filePath}");
-
                 using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     IExcelDataReader reader = null;
@@ -396,40 +395,61 @@ namespace CrudUsingAjax.Controllers
                             {
                                 if (reader.Depth == 0) continue;
 
+                                var firstName = reader.GetValue(1)?.ToString();
+                                var lastName = reader.GetValue(2)?.ToString();
+                                var email = reader.GetValue(3)?.ToString();
+                                var phoneNumber = reader.GetValue(4)?.ToString();
+                                var gender = reader.GetValue(5)?.ToString();
                                 var departmentStr = reader.GetValue(6)?.ToString();
-                                var departmentId = int.TryParse(departmentStr, out var deptId) ? deptId : 0;
+                                var joiningDateStr = reader.GetValue(7)?.ToString();
+                                var address = reader.GetValue(8)?.ToString();
+                                var imageFileName = reader.GetValue(9)?.ToString();
 
-                                //_logger.LogInformation($"Read Department Id: {departmentId}");
+                                var errors = new List<string>();
 
-                                if (_departmentRepository.GetById(departmentId) == null)
+                                if (string.IsNullOrWhiteSpace(firstName)) errors.Add("First Name is required");
+                                if (string.IsNullOrWhiteSpace(lastName)) errors.Add("Last Name is required");
+                                if (string.IsNullOrWhiteSpace(email)) errors.Add("Email is required");
+                                if (string.IsNullOrWhiteSpace(phoneNumber)) errors.Add("Phone Number is required");
+                                if (string.IsNullOrWhiteSpace(gender)) errors.Add("Gender is required");
+                                if (string.IsNullOrWhiteSpace(departmentStr)) errors.Add("Department ID is required");
+                                if (string.IsNullOrWhiteSpace(joiningDateStr)) errors.Add("Joining Date is required");
+                                if (string.IsNullOrWhiteSpace(address)) errors.Add("Address is required");
+
+                                if (errors.Count > 0)
                                 {
-                                    _logger.LogError($"Department ID : {departmentId} not found in database");
+                                    uploadResults.Add((email, "Error", string.Join(", ", errors)));
                                     continue;
                                 }
 
-                                var email = reader.GetValue(3)?.ToString();
+                                var departmentId = int.TryParse(departmentStr, out var deptId) ? deptId : 0;
+
+                                if (_departmentRepository.GetById(departmentId) == null)
+                                {
+                                    uploadResults.Add((email, "Error", $"Department ID : {departmentId} not found in database"));
+                                    continue;
+                                }
+
                                 var existingEmployee = _employeeRepository.GetAll().FirstOrDefault(e => e.Email == email);
 
                                 if (existingEmployee != null)
                                 {
-                                    _logger.LogError("Some emails already exist");
+                                    uploadResults.Add((email, "Error", "Email already exists"));
                                     continue;
                                 }
 
                                 var employee = new Employee
                                 {
-                                    First_Name = reader.GetValue(1)?.ToString(),
-                                    Last_Name = reader.GetValue(2)?.ToString(),
-                                    Email = reader.GetValue(3)?.ToString(),
-                                    Phone_Number = reader.GetValue(4)?.ToString(),
-                                    Gender = reader.GetValue(5)?.ToString(),
+                                    First_Name = firstName,
+                                    Last_Name = lastName,
+                                    Email = email,
+                                    Phone_Number = phoneNumber,
+                                    Gender = gender,
                                     Department_Id = departmentId,
-                                    Joining_Date = DateTime.TryParse(reader.GetValue(7)?.ToString(), out var joiningDate) ? new DateOnly?(DateOnly.FromDateTime(joiningDate)) : null,
-                                    Address = reader.GetValue(8)?.ToString(),
+                                    Joining_Date = DateTime.TryParse(joiningDateStr, out var joiningDate) ? new DateOnly?(DateOnly.FromDateTime(joiningDate)) : null,
+                                    Address = address,
                                 };
 
-                                // Handle image upload
-                                var imageFileName = reader.GetValue(9)?.ToString();
                                 if (!string.IsNullOrWhiteSpace(imageFileName))
                                 {
                                     var uniqueImageName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFileName)}";
@@ -441,30 +461,63 @@ namespace CrudUsingAjax.Controllers
                                     }
                                     employee.Profile_Image = "/image/" + uniqueImageName;
                                 }
-                                else
-                                {
-                                    _logger.LogError($"{imageFileName} does not exist.");
-                                }
+
                                 employeeList.Add(employee);
                             }
                         }
                     }
                 }
+
                 if (employeeList.Count > 0)
                 {
                     _employeeRepository.AddRange(employeeList);
                     _employeeRepository.SaveChanges();
-                    return Json(new { success = true, message = "Employee successfully uploaded" });
+                    foreach (var emp in employeeList)
+                    {
+                        uploadResults.Add((emp.Email, "Success", "Employee successfully uploaded"));
+                    }
                 }
                 else
                 {
-                    return Json(new { success = false, error = "No valid employee to upload." });
+                    uploadResults.Add(("N/A", "Error", "No valid employee to upload."));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Json(new { success = false });
+                return Json(new { success = false, error = "Employee data not uploaded" });
+            }
+
+            // Generate response Excel file
+            try
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    using (var package = new ExcelPackage(memoryStream))
+                    {
+                        var worksheet = package.Workbook.Worksheets.Add("Upload Results");
+                        worksheet.Cells[1, 1].Value = "Email";
+                        worksheet.Cells[1, 2].Value = "Status";
+                        worksheet.Cells[1, 3].Value = "Message";
+
+                        for (int i = 0; i < uploadResults.Count; i++)
+                        {
+                            worksheet.Cells[i + 2, 1].Value = uploadResults[i].Email;
+                            worksheet.Cells[i + 2, 2].Value = uploadResults[i].Status;
+                            worksheet.Cells[i + 2, 3].Value = uploadResults[i].Message;
+                        }
+
+                        package.Save();
+                    }
+
+                    var fileBytes = memoryStream.ToArray();
+                    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "UploadResults.xlsx"); 
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return Json(new { success = false, error = "Failed to generate Excel file." });
             }
         }
 
